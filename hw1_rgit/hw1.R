@@ -33,3 +33,14 @@ acc <- bind_rows(acc2014, acc2015)
 count(acc, RUR_URB)
 # RUR_URB was not a column in the 2014 data, which accounts for half of the rows in acc.
 # Thus, half the rows in acc do not have a RUR_URB entry.
+
+fips <- read_csv("fips.csv")
+glimpse(fips)
+
+acc$STATE <- as.character(acc$STATE)
+acc$STATE <- str_pad(acc$STATE, pad="0", width=2, side="left")
+acc$COUNTY <- as.character(acc$COUNTY)
+acc$COUNTY <- str_pad(acc$COUNTY, pad="0", width=3, side="left")
+
+acc <- rename(acc, "StateFIPSCode"="STATE")
+acc <- rename(acc, "CountFIPSCode"="COUNTY")
