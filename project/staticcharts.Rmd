@@ -1,7 +1,9 @@
 ---
 title: "A brief overview of CTA bus and Divvy trends"
 author: "Yuxi Wu"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 # Overview
@@ -108,7 +110,7 @@ Perhaps not so shockingly, the population of Divvy subscribers has been almost o
 
 
 
-```{r echo=FALSE, warning = FALSE, message=FALSE }
+```{r fig.align="center", echo=FALSE, warning = FALSE, message=FALSE }
 date_agg <- count(divvy, Date)
 date_agg <- dplyr::rename(date_agg, "Journeys"="n")
 
@@ -124,10 +126,11 @@ divvy_line
 ```
 
 ## When do subscribers ride Divvy?
+
 Again, looking only at data from the first two quarters of this year, we can already spot a possibly-season-related upward trend in ridership.  This makes sense -- as the weather gets warmer, people would more likely want to ride bikes.
 
 
-```{r echo=FALSE, warning = FALSE, message=FALSE }
+```{r fig.align="center", echo=FALSE, warning = FALSE, message=FALSE }
 #looking at types of journeys made by duration
 divvy <- transform(divvy, group=cut(tripduration,
                                     breaks=c(-Inf,300, 900, 1800, 2700, 3600, Inf),
@@ -135,16 +138,18 @@ divvy <- transform(divvy, group=cut(tripduration,
 divvy <- dplyr::rename(divvy,"tripdurtype"="group")
 durations <- count(divvy, tripdurtype)
 durations <- dplyr::rename(durations, "Duration"="tripdurtype", "count"='n')
+options(scipen=10000)
 
 bar_durations <- ggplot(durations,
               aes(x=Duration, y=count, fill=Duration)) +
   geom_bar(stat="identity",
            fill="#FF6666") +
-  theme(axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
-        legend.position="none") +
-  labs(title="\nTypes of Divvy journeys made, by duration",
-       caption="\nSource: Divvy Bikes system data, Q1 & Q2 2017") +
+  theme(legend.position="none") +
+  labs(title="Most Divvy riders take short trips",
+       subtitle="Extra fees beyond 30 minutes mean docking often or cycling quickly",
+       caption="\nSource: Divvy Bikes system data, Q1 & Q2 2017",
+       x="Duration",
+       y="Journeys") +
   theme(plot.margin = unit(c(1,1,1,1), "cm")) +
   yx_theme
 
@@ -156,7 +161,7 @@ bar_durations
 A chief criticism of bikeshare systems in any major city is that they are gimmicky and tourist-oriented.  Basic arithmetic in fare calcuation, however, would demonstrate that using Divvy becomes very expensive as soon as you cross the half-hour mark, a decidedly tourist-unfriendly reality. Although, due to the nature of ridership data, it's impossible to pick out which riders are tourists, it's unlikely that those unfamiliar with the city would want to face the obstacle of finding docking stations in untested territories.  Add a 30-minute constraint on top and it's probably more likely that the majority of people who use Divvy are those who know where they're going.  Indeed, rides drop to near-zero past the 30 minute mark:
 
 
-```{r echo=FALSE, warning = FALSE, message=FALSE }
+```{r fig.align="center", echo=FALSE, warning = FALSE, message=FALSE }
 bus_month <- bus_rides %>% group_by(month=floor_date(date, "month")) %>%
   summarize(amount=sum(rides))
 bus_month <- dplyr::rename(bus_month, "Rides"="amount")
@@ -179,7 +184,7 @@ bus_line
 So if people aren't using Divvy for more than very short trips, then how else are they getting around Chicago?  It's certainly not necessarily via bus, either.  Bus ridership has been in steady decline since at least the summer of 2013.
 
 
-```{r echo=FALSE, warning = FALSE, message=FALSE }
+```{r fig.align="center", echo=FALSE, warning = FALSE, message=FALSE }
 top_buses <- aggregate(bus_rides$rides, by=list(Category=bus_rides$route), FUN=sum)
 top_buses <- dplyr::rename(top_buses, "Rides"="x")
 top_buses <- dplyr::rename(top_buses, "Route"="Category")
@@ -203,7 +208,7 @@ tb
 Overwhelmingly, the buses with highest riderships travel to the most extreme outer limits of the city.  A fair amount of these buses travel along the Dan Ryan corridor and into the Southwest side of the city, where there are little to no signs of Divvy stations.  The busiest of these, the 79, ventures orthogonally, travelling along its namesake street from the lakefront through Chatham to the Ford City Mall.
 
 
-```{r echo=FALSE, warning = FALSE, message=FALSE }
+```{r fig.align="center", echo=FALSE, warning = FALSE, message=FALSE }
 bus_rides$mo <- strftime(bus_rides$date, "%m")
 bus_rides$yr <- strftime(bus_rides$date, "%Y")
 
@@ -245,7 +250,8 @@ bus79
 
 Mirroring the trends seen in a previous chart, even the busiest bus can't escape the grasp of the decline in bus ridership.  The 79 follows a seasonal trend similar to other buses, with dips in the middle of summer and winter.
 
-```{r echo=FALSE, warning = FALSE, message=FALSE }
+
+```{r fig.align="center", echo=FALSE, warning = FALSE, message=FALSE }
 b79_days <- subset(bus, route=="79")
 b79_days$mo <- strftime(b79_days$date, "%m")
 b79_days$yr <- strftime(b79_days$date, "%Y")
