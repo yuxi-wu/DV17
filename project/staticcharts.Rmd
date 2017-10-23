@@ -1,7 +1,13 @@
 ---
 title: "A brief overview of CTA bus and Divvy trends"
+author: "Yuxi Wu"
 output: pdf_document
 ---
+
+# Overview
+
+We begin with some simple breakdowns of who Divvy riders are and how they use Divvy.  An increasing aggregate Divvy usage can then be viewed in contrast to general decline in ridership of CTA buses.  We proceed to look at how such trends persist in one particular bus route that runs through the heart of the South Side.
+
 
 ```{r echo=FALSE, warning = FALSE, message=FALSE }
 libs <- c("readr","haven","dplyr","tidyr","stringr","ggplot2","lubridate","reshape2","reshape","extrafont")
@@ -45,6 +51,8 @@ yx_theme <- theme(plot.title = element_text(family="Times New Roman",
                                               size=10),
                   legend.text = element_text(family = "Helvetica",
                                               size=8),
+                  legend.background = element_rect(fill='blanchedalmond'),
+                  legend.key = element_rect(fill='blanchedalmond'),
                   plot.caption=element_text(family = "Helvetica",
                                             hjust = 0,
                                             size=8,
@@ -55,9 +63,7 @@ yx_theme <- theme(plot.title = element_text(family="Times New Roman",
 ```
 
 
-## General breakdown of Divvy subscribers
-
-```{r echo=FALSE, warning = FALSE, message=FALSE }
+```{r fig.align="center", echo=FALSE, warning = FALSE, message=FALSE }
 # looking at gender counts
 gen <- count(divvy, gender)
 gen <- dplyr::rename(gen, "count"="n")
@@ -88,16 +94,19 @@ pie_divvy_gen <- ggplot(gen, aes(x="", y=count, fill=Gender)) +
                                             size=8,
                                             color="black"),
         panel.background = element_rect(fill='blanchedalmond'),
-        plot.background = element_rect(fill='blanchedalmond')) + 
-  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+        plot.background = element_rect(fill='blanchedalmond')) +
+  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
   labs(title="\nMale Divvy subscriber journeys \noutnumber female three to one",
        caption="Source: Divvy Bikes system data, Q1 & Q2 2017")
 
 pie_divvy_gen
 ```
 
-## When do subscribers ride Divvy?
-Again, looking only at data from the first two quarters of this year, we can already spot a possibly-season-related upward trend in ridership.  This makes sense -- as the weather gets warmer, people would more likely want to ride bikes.
+## Gender breakdown of Divvy subscribers
+
+Perhaps not so shockingly, the population of Divvy subscribers has been almost overwhelmingly male.  This is in line with bikeshare demographics in other cities as well as cycling cultures in general, but is ripe for exploration on whom such systems really benefit, if one half of the population is so woefully underserved. //
+
+
 
 ```{r echo=FALSE, warning = FALSE, message=FALSE }
 date_agg <- count(divvy, Date)
@@ -105,17 +114,18 @@ date_agg <- dplyr::rename(date_agg, "Journeys"="n")
 
 divvy_line <- ggplot(date_agg, aes(x=Date, y=Journeys, group=1)) +
   geom_line(aes(color=I("dodgerblue1"))) +
-  labs(title="\nDivvy Ridership increases through season changes",
+  labs(title="\nDivvy Ridership increases through season changes\n",
        caption="\nSource: Divvy Bikes system data, Q1 & Q2 2017",
        x="Date in 2017",
        y="Journeys") +
+  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
   yx_theme
 divvy_line
 ```
 
+## When do subscribers ride Divvy?
+Again, looking only at data from the first two quarters of this year, we can already spot a possibly-season-related upward trend in ridership.  This makes sense -- as the weather gets warmer, people would more likely want to ride bikes.
 
-## Types and durations of Divvy journeys
-A chief criticism of bikeshare systems in any major city is that they are gimmicky and tourist-oriented.  Basic arithmetic in fare calcuation, however, would demonstrate that using Divvy becomes very expensive as soon as you cross the half-hour mark, a decidedly tourist-unfriendly reality. Although, due to the nature of ridership data, it's impossible to pick out which riders are tourists, it's unlikely that those unfamiliar with the city would want to face the obstacle of finding docking stations in untested territories.  Add a 30-minute constraint on top and it's probably more likely that the majority of people who use Divvy are those who know where they're going.  Indeed, rides drop to near-zero past the 30 minute mark:
 
 ```{r echo=FALSE, warning = FALSE, message=FALSE }
 #looking at types of journeys made by duration
@@ -126,7 +136,7 @@ divvy <- dplyr::rename(divvy,"tripdurtype"="group")
 durations <- count(divvy, tripdurtype)
 durations <- dplyr::rename(durations, "Duration"="tripdurtype", "count"='n')
 
-bar_durations <- ggplot(durations, 
+bar_durations <- ggplot(durations,
               aes(x=Duration, y=count, fill=Duration)) +
   geom_bar(stat="identity",
            fill="#FF6666") +
@@ -135,14 +145,17 @@ bar_durations <- ggplot(durations,
         legend.position="none") +
   labs(title="\nTypes of Divvy journeys made, by duration",
        caption="\nSource: Divvy Bikes system data, Q1 & Q2 2017") +
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
   yx_theme
 
 bar_durations
 ```
 
+## Types and durations of Divvy journeys
 
-## People aren't riding buses as much as before
-So if people aren't using Divvy for more than very short trips, then how else are they getting around Chicago?  It's certainly not necessarily via bus, either.  Bus ridership has been in steady decline since at least the summer of 2013.
+A chief criticism of bikeshare systems in any major city is that they are gimmicky and tourist-oriented.  Basic arithmetic in fare calcuation, however, would demonstrate that using Divvy becomes very expensive as soon as you cross the half-hour mark, a decidedly tourist-unfriendly reality. Although, due to the nature of ridership data, it's impossible to pick out which riders are tourists, it's unlikely that those unfamiliar with the city would want to face the obstacle of finding docking stations in untested territories.  Add a 30-minute constraint on top and it's probably more likely that the majority of people who use Divvy are those who know where they're going.  Indeed, rides drop to near-zero past the 30 minute mark:
+
+
 ```{r echo=FALSE, warning = FALSE, message=FALSE }
 bus_month <- bus_rides %>% group_by(month=floor_date(date, "month")) %>%
   summarize(amount=sum(rides))
@@ -152,16 +165,20 @@ bus_month <- transform(bus_month, Rides=Rides/1000000)
 
 bus_line <- ggplot(bus_month, aes(x=Month, y=Rides, group=1)) +
   geom_line(aes(color=I("dodgerblue1"))) +
-  labs(title="\nCity-wide bus ridership down from summer 2013",
+  labs(title="\nCity-wide bus ridership down from summer 2013\n",
        caption="\nSource: Daily bus ridership totals, City of Chicago",
        x="Date",
        y="Rides (millions)") +
+  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
   yx_theme
 bus_line
 ```
 
+## People aren't riding buses as much as before
 
-## The busiest buses reach the farthest corners of the city
+So if people aren't using Divvy for more than very short trips, then how else are they getting around Chicago?  It's certainly not necessarily via bus, either.  Bus ridership has been in steady decline since at least the summer of 2013.
+
+
 ```{r echo=FALSE, warning = FALSE, message=FALSE }
 top_buses <- aggregate(bus_rides$rides, by=list(Category=bus_rides$route), FUN=sum)
 top_buses <- dplyr::rename(top_buses, "Rides"="x")
@@ -169,19 +186,23 @@ top_buses <- dplyr::rename(top_buses, "Route"="Category")
 top_buses <- transform(top_buses, Rides=Rides/1000000)
 
 top_buses <- top_buses[order(-top_buses$Rides),][1:20,]
-tb <- ggplot(top_buses, aes(x=reorder(Route, -Rides),y=Rides)) + 
+tb <- ggplot(top_buses, aes(x=reorder(Route, -Rides),y=Rides)) +
   geom_bar(stat='identity') +
   labs(title="\n79th Street bus is busiest in Chicago",
        subtitle="South Side dominates in top 20 most-ridden routes",
        caption="\nSource: Daily bus ridership totals by route, City of Chicago",
        x="Route",
        y="Rides (millions)") +
+  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
   yx_theme
 tb
 ```
 
+## The busiest buses reach the farthest corners of the city
 
-## Even the busiest bus is less busy now
+Overwhelmingly, the buses with highest riderships travel to the most extreme outer limits of the city.  A fair amount of these buses travel along the Dan Ryan corridor and into the Southwest side of the city, where there are little to no signs of Divvy stations.  The busiest of these, the 79, ventures orthogonally, travelling along its namesake street from the lakefront through Chatham to the Ford City Mall.
+
+
 ```{r echo=FALSE, warning = FALSE, message=FALSE }
 bus_rides$mo <- strftime(bus_rides$date, "%m")
 bus_rides$yr <- strftime(bus_rides$date, "%Y")
@@ -189,13 +210,13 @@ bus_rides$yr <- strftime(bus_rides$date, "%Y")
 b79 <- subset(bus_rides, route=="79")
 
 b79m <- data.frame(matrix(, nrow=12, ncol=0))
-y14 <- filter(bus_rides, (yr=="2014" & route=="79")) %>% 
+y14 <- filter(bus_rides, (yr=="2014" & route=="79")) %>%
   group_by(mo) %>%
   summarize(amount=sum(rides))
 y15 <- filter(bus_rides, (yr=="2015" & route=="79")) %>%
   group_by(mo) %>%
   summarize(amount=sum(rides))
-y16 <- filter(bus_rides, (yr=="2016" & route=="79")) %>% 
+y16 <- filter(bus_rides, (yr=="2016" & route=="79")) %>%
   group_by(mo) %>%
   summarize(amount=sum(rides))
 
@@ -206,7 +227,7 @@ b79m$month <- c("01","02","03","04","05","06","07","08","09","10","11","12")
 
 b79m_melt <- melt(b79m, id.vars="month")
 
-bus79 <- ggplot(b79m_melt, aes(x=month, y=value, group=variable, colour=variable)) + 
+bus79 <- ggplot(b79m_melt, aes(x=month, y=value, group=variable, colour=variable)) +
   geom_line() +
   scale_color_manual(labels = c("2014", "2015","2016"), values = c("#d2e8ff", "#bbddff","#ff8d1e")) +
   labs(title="\nYearly ridership on 79 bus route",
@@ -214,11 +235,17 @@ bus79 <- ggplot(b79m_melt, aes(x=month, y=value, group=variable, colour=variable
        x="Month",
        y="Rides (10,000)",
        color = "Year") +
+  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
   yx_theme
 
 bus79
 ```
-```{r}
+
+## Even the busiest bus is less busy now
+
+Mirroring the trends seen in a previous chart, even the busiest bus can't escape the grasp of the decline in bus ridership.  The 79 follows a seasonal trend similar to other buses, with dips in the middle of summer and winter.
+
+```{r echo=FALSE, warning = FALSE, message=FALSE }
 b79_days <- subset(bus, route=="79")
 b79_days$mo <- strftime(b79_days$date, "%m")
 b79_days$yr <- strftime(b79_days$date, "%Y")
@@ -226,7 +253,7 @@ b79_days$ym <- strftime(b79_days$date, "%Y/%m")
 b79_days <- b79_days %>% group_by(month=floor_date(date, "month"), daytype) %>% summarise(amount=sum(rides))
 b79_days$amount <- b79_days$amount / 10000
 
-ggplot(b79_days, aes(x=month, y=amount, group=daytype, fill=daytype, order=daytype)) + 
+ggplot(b79_days, aes(x=month, y=amount, group=daytype, fill=daytype, order=daytype)) +
   geom_area() +
   scale_color_manual(values =c("#753157","#4c9141","#1E90FF")) +
   labs(title="\nThe 79 bus is sparsely ridden on the weekends\n",
@@ -234,10 +261,14 @@ ggplot(b79_days, aes(x=month, y=amount, group=daytype, fill=daytype, order=dayty
        x="Date",
        y="Rides (10,000)",
        color = "Day Type") +
+  theme(plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")) +
   yx_theme +
   scale_fill_discrete(name = "Day Type",
                       labels = c("Saturday", "Sunday/Holiday","Weekdays"))
-  
+
 
 ```
 
+## Does weekday-heavy ridership suggest commuting, not visiting?
+
+Only a small fraction of the 79's ridership comes from weekends and holidays, suggesting that stops along this route are not necessarily destinations for people from outside of the area.  This is corroborated by the fact that the route cuts straight through the heart of Auburn Gresham, historically a high violent crime area.  Divvy availability mirrors this information, as docking stations stop abruptly east of Dan Ryan in Chatham and never appear at any point further westward on this route.
