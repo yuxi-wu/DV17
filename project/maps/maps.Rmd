@@ -8,4 +8,4 @@ output: html_document
 
 ![](/Users/yuxiwu/git_svn/DV17/project/maps/map2.png)
 
-
+![](/Users/yuxiwu/git_svn/DV17/project/maps/CTA_map.png)
