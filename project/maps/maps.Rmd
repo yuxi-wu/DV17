@@ -1,0 +1,11 @@
+---
+title: "Some more Divvy data."
+output: html_document
+---
+![](/Users/yuxiwu/git_svn/DV17/project/maps/map1.png)
+
+***
+
+![](/Users/yuxiwu/git_svn/DV17/project/maps/map2.png)
+
+

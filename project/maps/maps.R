@@ -46,19 +46,9 @@ stations <- stations %>% extract(Location, c('Latitude', 'Longitude'), '\\(([^,]
 stations$Longitude <- as.numeric(stations$Longitude)
 stations$Latitude <- as.numeric(stations$Latitude)
 div1412 <- read_csv("divvy2014_12.csv")
+div172 <- read_csv("divvy2017_2.csv")
 
 chicago <- get_map("chicago", source="stamen", maptype="toner-lite", zoom=11)
-
-stationsmap <- ggmap(chicago) +
-  geom_tile(data = s,
-            aes(x=long, y=lat, alpha = Frequency),
-            fill = 'red') +
-  theme(axis.title.y = element_blank(),
-        axis.title.x = element_blank()) +
-  labs(title="Divvy stations concentrated downtown",
-       subtitle="Booooo tourists!!!",
-       caption="\nSource: Divvy Bikes system data, Q1 & Q2 2017") +
-  yx_theme
 
 s <- count(div1412, from_station_id)
 s <- rename(s, "ID"="from_station_id")
@@ -80,10 +70,38 @@ d14 <- qmplot(Longitude, Latitude,
   scale_fill_gradient(low="green",high = "red",
                       guide = guide_legend(title = "Stations")) +
   scale_alpha(range = c(0, 0.3), guide = FALSE) +
-  labs(title="Early Divvy stations concentrated \nalong northern 'L' branches",
-       subtitle="Traditionally wealthy, established, already-gentrified \nneighbourhoods saw more initial access",
-       caption="\nSource: Divvy Bikes system data, Q1 & Q2 2014") +
+  labs(title="Early Divvy stations \nconcentrated along \nnorthern 'L' branches",
+       subtitle="Traditionally wealthy, established, \nalready-gentrified neighbourhoods \nsaw more initial access",
+       caption="\nSource: Divvy Bikes, Q1 & Q2 2014") +
   yx_theme + 
   map_margins
 
 ggsave("map1.png", plot=d14)
+
+s17 <- count(div172, from_station_id)
+s17 <- rename(s17, "ID"="from_station_id")
+s17 <- rename(s17,"Freq"="n")
+s17 <- s17 %>% left_join(stations)
+
+d17 <- qmplot(Longitude, Latitude,
+              data=s17,
+              maptype = "toner-background",
+              darken = 0.6,
+              extent = "device") +
+  stat_density2d(data=s17, 
+                 aes(x=Longitude, y =Latitude,
+                     fill = ..level..,
+                     alpha = ..level..),
+                 size = 0.01, 
+                 bins = 30,
+                 geom = "polygon") +
+  scale_fill_gradient(low="green",high = "red",
+                      guide = guide_legend(title = "Stations")) +
+  scale_alpha(range = c(0, 0.3), guide = FALSE) +
+  labs(title="Divvy continues uneven \ndock location expansion",
+       subtitle="Stations reach more parts of Chicago \nbut South Side still more poorly served",
+       caption="\nSource: Divvy Bikes, Q1 & Q2 2017") +
+  yx_theme + 
+  map_margins
+
+ggsave("map2.png", plot=d17)
