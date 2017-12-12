@@ -17,10 +17,10 @@ l <- lapply(libs,library,character.only=TRUE)
 ```
 
 ```{r echo=FALSE, warning = FALSE, message=FALSE }
-setwd("/Users/yuxiwu/git_svn/DV17/project")
+setwd("/Users/yuxiwu/git_svn/dataviz/DV17/project")
 bus <- read_csv("busridership_byroute.csv")
 bus_rides <- bus[,!(names(bus) %in% c("daytype"))]
-divvy <- read_csv("../hw2_charts/Divvy_Trips_2017_Q2.csv")
+divvy <- read_csv("Divvy_Trips_2017_Q2.csv")
 
 divvy <- na.omit(divvy)
 divvy$Date <- as.Date(strptime(divvy$start_time, format="%m/%d/%Y %H:%M:%S", tz = ""))
@@ -51,15 +51,15 @@ yx_theme <- theme(plot.title = element_text(family="CMU Serif",
                   axis.text = element_text(size=8),
                   legend.title = element_text(family = "CMU Serif",
                                               size=10),
-                  legend.text = element_text(family = "CMU Bright",
+                  legend.text = element_text(family = "CMU Serif",
                                               size=8),
                   legend.background = element_rect(fill='blanchedalmond'),
                   legend.key = element_rect(fill='blanchedalmond'),
-                  plot.caption=element_text(family = "CMU Bright",
+                  plot.caption=element_text(family = "CMU Serif",
                                             hjust = 0,
                                             size=8,
                                             color="black"),
-                  panel.grid = element_blank(),
+                  #panel.grid = element_blank(),
                   panel.background = element_rect(fill='blanchedalmond'),
                   plot.background = element_rect(fill='blanchedalmond'))
 ```
@@ -81,17 +81,17 @@ pie_divvy_gen <- ggplot(gen, aes(x="", y=count, fill=Gender)) +
   coord_polar(theta="y") +
   theme_void() +
   theme(legend.position = "none",
-        plot.title = element_text(family="Times New Roman",
+        plot.title = element_text(family="CMU Serif",
                                             face="bold",
                                             size=16,
                                             hjust=0,
                                             margin = margin(0, 22, 0, 0)),
                   plot.subtitle = element_text(size=10,
-                                               family="Times New Roman",
+                                               family="CMU Serif",
                                                face="italic",
                                                color="#8E8883",
                                                margin = margin(10, 22, 22, 0)),
-                  plot.caption=element_text(family = "Helvetica",
+                  plot.caption=element_text(family = "CMU Serif",
                                             hjust = 0,
                                             size=8,
                                             color="black"),
